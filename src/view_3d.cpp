@@ -117,9 +117,13 @@ void view_3d::draw_level(level& lvl) const {
 	};
 	
 	lvl.world.for_each<tie>([=](std::size_t index, tie& object) {
-		auto pos = object.position();
-		auto rot = glm::vec3(0, 0, 0);
-		glm::mat4 local_to_clip = get_local_to_clip(world_to_clip, pos, rot);
+		glm::mat4 mat = object.mat();
+		mat[0][3] = 0;
+        mat[1][3] = 0;
+        mat[2][3] = 0;
+        mat[3][3] = 1;
+
+		glm::mat4 local_to_clip = world_to_clip * mat;
 		object_id id { object_type::TIE, index };
 		glm::vec3 colour = get_colour(id, glm::vec3(0.5, 0, 1));
 		_renderer->draw_cube(local_to_clip, colour);
@@ -168,11 +172,11 @@ void view_3d::draw_overlay_text(level& lvl) const {
 	};
 	
 	lvl.world.for_each<tie>([=](std::size_t i, tie& object) {
-		draw_text(object.position(), "t");
+		draw_text(glm::vec3(object.mat()[3]), "t");
 	});
 	
 	lvl.world.for_each<shrub>([=](std::size_t i, shrub& object) {
-		draw_text(object.position(), "s");
+		draw_text(glm::vec3(object.mat()[3]), "s");
 	});
 	
 	lvl.world.for_each<moby>([=](std::size_t i, moby& object) {
@@ -281,9 +285,13 @@ void view_3d::draw_pickframe(level& lvl) const {
 	};
 	
 	lvl.world.for_each<tie>([=](std::size_t index, tie& object) {
-		auto pos = object.position();
-		auto rot = glm::vec3(0, 0, 0);
-		glm::mat4 local_to_clip = get_local_to_clip(world_to_clip, pos, rot);
+        glm::mat4 mat = object.mat();
+        mat[0][3] = 0;
+        mat[1][3] = 0;
+        mat[2][3] = 0;
+        mat[3][3] = 1;
+
+        glm::mat4 local_to_clip = world_to_clip * mat;
 		object_id id { object_type::TIE, index };
 		glm::vec3 colour = encode_pick_colour(id);
 		_renderer->draw_cube(local_to_clip, colour);
